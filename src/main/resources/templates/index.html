@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Upload a file</title>
+        <title>One hour file sharing</title>
+         <meta name="viewport" content="width=device-width, initial-scale=1.0"/> 
         <link href="style.css" rel="stylesheet"/>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" 
                 integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw==" 
@@ -15,7 +16,10 @@
                         body: document.getElementById('file').files[0]
                     }).
                             then(r => r.text()).
-                            then(t => document.getElementById('result').textContent = t);
+                            then(t => { 
+                                document.getElementById('result').textContent = t;
+                        document.getElementById('responseParagraph').style.display = "block";
+                    });
                     event.preventDefault();
                 });
 
@@ -23,7 +27,9 @@
                     fetch("/", {
                         method: 'POST',
                         body: document.getElementById('text').value
-                    }).then(r => r.text()).then(t => document.getElementById('result').textContent = t);
+                    }).then(r => r.text()).then(t => { document.getElementById('result').textContent = t;
+                        document.getElementById('responseParagraph').style.display = "block";
+                    });
                     event.preventDefault();
                 });
 
@@ -31,9 +37,10 @@
         </script>
     </head>
     <body>
-        <h1>Upload a file</h1>
+        <h1>One hour file sharing</h1>
 
-        <p>Code: <span style="font-family: monospace; font-weight: bolder;" id="result">-</span></p>
+        <p class="response" id="responseParagraph" style="display: none;">https://mwtj.com/<span 
+                id="result">-</span></p>
 
         <form id="fileUpload">
             <p>File: <input id="file" type="file" name="file"/>
@@ -50,13 +57,7 @@
         <h1>Using curl</h1>
         
         <pre>curl --data 'a string' https://mwtj.com/
-curl --data @someFile https://mwtj.com/
-curl --data-binary @somefile https://mwtj.com/
-        </pre>
-        
-        <h1>Get the result</h1>
-        
-        <pre>https://mwtj.com/123456</pre>
+curl --data-binary @somefile https://mwtj.com/</pre>
         
     </body>
 </html>

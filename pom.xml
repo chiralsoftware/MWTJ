@@ -66,7 +66,7 @@
             <plugin>
                 <!-- To compile to native, make sure JAVA_HOME is set to an appropriate GraalVM with
                 native-image installed, and then run:
-                mvnw native:compile -Pnative 
+                mvn native:compile -Pnative 
                 This needs the hint from the MyImportRuntimeHints to work with simplemagic
                 -->
                 <groupId>org.graalvm.buildtools</groupId>

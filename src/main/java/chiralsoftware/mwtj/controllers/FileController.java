@@ -39,7 +39,7 @@ public class FileController {
     
     private final Random random = new Random();
     
-    private static final int maxLength = 1000000;
+    private static final int maxLength = 3000000;
     
     private Integer makeKey() {
         return random.nextInt(100000, 999999);
@@ -59,13 +59,13 @@ public class FileController {
     
     @GetMapping(value="/{number:[\\d]+}")
     public ResponseEntity<byte[]> getFile(@PathVariable int number) {
+        LOG.info("i'm looking for number: " + number);
         final byte[] bytes = cache.getIfPresent(number);
         if(bytes == null) throw new ResponseStatusException(NOT_FOUND, "file number: " + number + " was not found");
         final MediaType mediaType;
         final ContentInfo contentInfo = contentInfoUtil.findMatch(bytes);
         if(contentInfo == null) mediaType = TEXT_PLAIN;
         else mediaType = MediaType.valueOf(contentInfo.getMimeType());
-//        LOG.info("got this media type: " + mediaType);
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(mediaType == null ? TEXT_PLAIN : mediaType);
         final ResponseEntity<byte[]> result = ResponseEntity.ok().headers(headers).body(bytes);

@@ -18,6 +18,9 @@ public class MyImportRuntimeHints {
         @Override
         public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
             hints.resources().registerPattern("magic.gz");
+            hints.resources().registerPattern("iana_app.gz");
+            hints.resources().registerPattern("iana_font.gz");
+            hints.resources().registerPattern("iana_audio.gz");
         }
     }
 

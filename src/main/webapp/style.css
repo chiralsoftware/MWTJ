@@ -2,3 +2,8 @@ html {
     background-color: aliceblue;
     font-family: sans-serif;
 }
+
+p.response {
+    font-family: monospace; 
+    font-weight: bolder;
+}
