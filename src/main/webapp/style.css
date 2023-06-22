@@ -6,4 +6,5 @@ html {
 p.response {
     font-family: monospace; 
     font-weight: bolder;
+    text-align: center;
 }
