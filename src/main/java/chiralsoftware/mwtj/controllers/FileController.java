@@ -15,6 +15,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import org.springframework.http.MediaType;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 import org.springframework.http.ResponseEntity;
+import static org.springframework.http.ResponseEntity.ok;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,16 +42,12 @@ public class FileController {
     
     private static final int maxLength = 3000000;
     
-    private Integer makeKey() {
-        return random.nextInt(100000, 999999);
-    }
-    
     @ResponseBody
     @PostMapping("/")
     public String saveFile(HttpServletRequest request) throws IOException {
         final byte[] bytes = request.getInputStream().readAllBytes();
         if(bytes.length > maxLength) throw new ResponseStatusException(I_AM_A_TEAPOT, "file was too big");
-        final Integer key = makeKey();
+        final Integer key = random.nextInt(100000, 999999);
         cache.put(key, bytes);
         return key.toString();
     }
@@ -59,7 +56,6 @@ public class FileController {
     
     @GetMapping(value="/{number:[\\d]+}")
     public ResponseEntity<byte[]> getFile(@PathVariable int number) {
-        LOG.info("i'm looking for number: " + number);
         final byte[] bytes = cache.getIfPresent(number);
         if(bytes == null) throw new ResponseStatusException(NOT_FOUND, "file number: " + number + " was not found");
         final MediaType mediaType;
@@ -68,8 +64,7 @@ public class FileController {
         else mediaType = MediaType.valueOf(contentInfo.getMimeType());
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(mediaType == null ? TEXT_PLAIN : mediaType);
-        final ResponseEntity<byte[]> result = ResponseEntity.ok().headers(headers).body(bytes);
-        return result;
+        return ok().headers(headers).body(bytes);
     }
     
 }

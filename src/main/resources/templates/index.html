@@ -38,23 +38,25 @@
     </head>
     <body>
         <h1>One hour file sharing</h1>
-
+        
         <p class="response" id="responseParagraph" style="display: none;">https://mwtj.com/<span 
                 id="result">-</span></p>
+
+        <h2>Upload a file</h2>
 
         <form id="fileUpload">
             <p>File: <input id="file" type="file" name="file"/>
                 <input type="submit" value="upload"/>
         </form>
 
-        <h1>Upload text</h1>
+        <h2>Post text</h2>
         <form id="formUpload">
             <textarea id="text" spellcheck="false" rows="12"
                       style="font-family:monospace; width: 100%; box-sizing: border-box;"></textarea>
                       <p><input type="submit" value="upload"/></p>
         </form>
         
-        <h1>Using curl</h1>
+        <h2>Using curl</h2>
         
         <pre>curl --data 'a string' https://mwtj.com/
 curl --data-binary @somefile https://mwtj.com/</pre>
