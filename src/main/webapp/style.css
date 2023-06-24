@@ -7,4 +7,5 @@ p.response {
     font-family: monospace; 
     font-weight: bolder;
     text-align: center;
+    font-size: calc(15px + 0.9vw);
 }
