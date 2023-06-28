@@ -46,7 +46,6 @@ public class FileController {
     private final Random random = new Random();
 
     private static final int maxLength = 100 * 1000000; // files up to 100mb - can be useful for videos
-    private static final byte[] httpPrefix = "http://".getBytes();
     private static final byte[] httpsPrefix = "https://".getBytes();
 
     @ResponseBody
@@ -65,15 +64,27 @@ public class FileController {
      * trackers.
      * Actually we might want to always strip all parameters - these are almost
      * always affiliate and tracker. Forums don't use parameters anymore.
-     * Exceptions are YouTube and Google queries
+     * Exceptions are YouTube and Google queries.
+     * Here's an article on tracker links:
+     * https://medium.com/@ian-darwin/you-are-sharing-urls-with-tracking-links-please-stop-502c6f54895
      */
     private static byte[] safeUrl(byte bytes[]) {
+        // any URL which is so short isn't really a URL probably, and certainly doesn't have trackers
+        if(bytes.length <= httpsPrefix.length + 5) return bytes;
+        
         if (!Arrays.equals(bytes, 0, httpsPrefix.length, httpsPrefix, 0, httpsPrefix.length))
             return bytes;
+        
+        // it appears to be a URL - make sure it's not too long so it's not some kind of weird hack
+        if(bytes.length > 1000) bytes = Arrays.copyOf(bytes, 1000);
+        
         // convert to a string
-        String urlString = new String(bytes);
+        String urlString = new String(bytes); 
         urlString = urlString.replaceFirst("\\?fbclid=.+$", "");
         urlString = urlString.replaceFirst("\\?igshid=.+$", "");
+        // look for utm_ entries like this:
+        // https://www.example.com/events/2952617?utm_medium=email&utm_source=sendgrid&utm_campaign=event_announce_en
+        urlString = urlString.replaceFirst("\\?utm_[a-z]+=.+$", "");
         // if this is a google link let's fix it
         if (urlString.startsWith("https://www.google.com/url")) {
             final MultiValueMap<String, String> params = UriComponentsBuilder.fromUriString(urlString).build().getQueryParams();
@@ -85,7 +96,6 @@ public class FileController {
             }
         }
         
-
         if (urlString.startsWith("https://adclick.g.doubleclick.net/aclk")) {
             final MultiValueMap<String, String> params = UriComponentsBuilder.fromUriString(urlString).build().getQueryParams();
             if (params.containsKey("adurl")) {
