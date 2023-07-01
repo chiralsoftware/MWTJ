@@ -72,8 +72,7 @@ class MwtjApplicationTests {
                 andExpectAll(status().isOk(),
                         content().string("https://example.com/store/65279")
                 ).andReturn().getResponse().getContentAsString();
-        LOG.info("the returned url is: " + returnedUrl);
-//        LOG.info("mockMvc test done!");
+//        LOG.info("the returned url is: " + returnedUrl);
     }
 
 }

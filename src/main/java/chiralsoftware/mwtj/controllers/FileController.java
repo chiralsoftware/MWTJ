@@ -58,6 +58,19 @@ public class FileController {
         cache.put(key, safeUrl(bytes));
         return key.toString();
     }
+    
+    private static String removeTrackers(String urlString) {
+        if(! urlString.startsWith("https://")) {
+            LOG.info("trying to remove trackers from a string that's not a URL...");
+            return urlString;
+        }
+                urlString = urlString.replaceFirst("\\?fbclid=.+$", "");
+        urlString = urlString.replaceFirst("\\?igshid=.+$", "");
+        // look for utm_ entries like this:
+        // https://www.example.com/events/2952617?utm_medium=email&utm_source=sendgrid&utm_campaign=event_announce_en
+        urlString = urlString.replaceFirst("\\?utm_[a-z]+=.+$", "");
+        return urlString;
+    }
 
     /**
      * In the case where someone posts a URL, let's go ahead and strip out
@@ -80,18 +93,16 @@ public class FileController {
         
         // convert to a string
         String urlString = new String(bytes); 
-        urlString = urlString.replaceFirst("\\?fbclid=.+$", "");
-        urlString = urlString.replaceFirst("\\?igshid=.+$", "");
-        // look for utm_ entries like this:
-        // https://www.example.com/events/2952617?utm_medium=email&utm_source=sendgrid&utm_campaign=event_announce_en
-        urlString = urlString.replaceFirst("\\?utm_[a-z]+=.+$", "");
+        urlString = removeTrackers(urlString);
+        
         // if this is a google link let's fix it
-        if (urlString.startsWith("https://www.google.com/url")) {
+        if (urlString.startsWith("https://www.google.com/url")||
+                urlString.startsWith("https://go.redirectingat.com/")) {
             final MultiValueMap<String, String> params = UriComponentsBuilder.fromUriString(urlString).build().getQueryParams();
             if (params.containsKey("url")) {
                 final String urlResultString = params.getFirst("url");
-                if (!isBlank(urlResultString))
-                    return URLDecoder.decode(urlResultString, UTF_8).getBytes();
+                if (!isBlank(urlResultString)) 
+                    return removeTrackers(URLDecoder.decode(urlResultString, UTF_8)).getBytes();
                 return bytes;
             }
         }
@@ -101,8 +112,7 @@ public class FileController {
             if (params.containsKey("adurl")) {
                 final String urlResultString = params.getFirst("adurl");
                 if (!isBlank(urlResultString))
-                    // AND THE URL-DECODED RESULT SHOULD PROBABLY ALSO HAVE PARAMETERS REMOVED!
-                    return URLDecoder.decode(urlResultString, UTF_8).getBytes();
+                    return removeTrackers(URLDecoder.decode(urlResultString, UTF_8)).getBytes();
                 return bytes;
             }
             
