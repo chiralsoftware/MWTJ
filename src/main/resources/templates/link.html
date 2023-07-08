@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>One hour file sharing - link</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/> 
+        <link th:href="@{/style.css}" rel="stylesheet"/>
+    </head>
+    <body>
+        <h1>Link</h1>
+
+        <p><span id="link" class="link">[[${link}]]</span> <button onclick="copyText()">copy</button> 
+            <a th:href="${link}">go</a></p>
+
+        <p><a th:href="@{/}">back</a></p>
+
+        <script>
+            function copyText() {
+                /* Select text area by id*/
+                var span = document.getElementById("link");
+
+                /* Copy selected text into clipboard */
+                navigator.clipboard.writeText(span.textContent);
+            }
+        </script>
+    </body>
+</html>

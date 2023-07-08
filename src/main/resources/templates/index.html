@@ -32,29 +32,68 @@
                     });
                     event.preventDefault();
                 });
+                
+                $('#shareUrl').submit(function(event) { 
+                    fetch("/url", { 
+                        method: 'POST',
+                        body: document.getElementById('url').value 
+                    });
+                });
 
             });
         </script>
     </head>
     <body>
-        <h1>One hour file sharing</h1>
+        <h1>One hour file and link sharing</h1>
+        
+        <ul>
+            <li>Share files and URLs over the phone by creating easy to read and type links</li>
+            <li>Create safe links without trackers</li>
+            <li>Easily transfer files and URLs from a phone to another device</li>
+        </ul>
         
         <p class="response" id="responseParagraph" style="display: none;">https://mwtj.com/<span 
                 id="result">-</span></p>
 
+        <h2>Share a link (URL)</h2>
+        <form action="link" method="post" id="shareUrl">
+            <textarea name="s" spellcheck="false" rows="3"></textarea>
+                      <p>create shared URL, removing all trackers and affiliates <input type="submit" value="share"/></p>
+        </form>
+
+        <hr/> 
+        
         <h2>Upload a file</h2>
 
         <form id="fileUpload">
             <p>File: <input id="file" type="file" name="file"/>
                 <input type="submit" value="upload"/>
         </form>
-
+        
+        <hr/> 
+        
         <h2>Post text</h2>
         <form id="formUpload">
-            <textarea id="text" spellcheck="false" rows="12"
-                      style="font-family:monospace; width: 100%; box-sizing: border-box;"></textarea>
+            <textarea id="text" spellcheck="false" rows="12"></textarea>
                       <p><input type="submit" value="upload"/></p>
         </form>
+        
+        <hr/>
+        
+        <h2>Share image</h2>
+        <form id="imageUpload">
+            <p>File: <input id="image" disabled="disabled" type="file" name="file"/>
+                resize to: 
+                <input type="radio" name="resize" checked="checked" value="1200"/> 1200
+                <input type="radio" name="resize" value="800"/> 800
+                <input type="radio" name="resize" value="600"/> 600
+                file format: <input type="radio" name="format" value="jpeg"/> jpeg
+                <input type="radio" name="format" value="png"/> png
+                <input type="checkbox" name="store" value="store"/> long duration
+                <input type="submit" disabled="disabled" value="upload"/>
+        </form>
+
+        <hr/>
         
         <h2>Using curl</h2>
         

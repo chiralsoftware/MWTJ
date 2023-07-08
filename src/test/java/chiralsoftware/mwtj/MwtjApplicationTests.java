@@ -14,6 +14,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.MediaType;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
