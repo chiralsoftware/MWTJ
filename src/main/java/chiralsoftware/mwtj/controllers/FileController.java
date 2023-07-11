@@ -1,5 +1,6 @@
 package chiralsoftware.mwtj.controllers;
 
+import static chiralsoftware.mwtj.controllers.DerUntracker.remoteRedirect;
 import static chiralsoftware.mwtj.controllers.DerUntracker.removeRedirect;
 import static chiralsoftware.mwtj.controllers.DerUntracker.removeTrackers;
 import com.google.common.cache.Cache;
@@ -8,9 +9,11 @@ import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Random;
 import static java.util.concurrent.TimeUnit.HOURS;
+import static java.util.logging.Level.FINE;
 import java.util.logging.Logger;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import org.springframework.http.HttpHeaders;
@@ -56,6 +59,17 @@ public class FileController {
         // sorry, not going to deal with HTTP URLs
         if(s.startsWith("http://")) s = s.replaceFirst("http://", "https://"); 
         if(! s.startsWith("https://")) s = "https://" + s; // if someone just entered example.com
+        try {
+            String remoteRedirect = remoteRedirect(s);
+            if(remoteRedirect != null) {
+                s = remoteRedirect;
+                remoteRedirect = remoteRedirect(remoteRedirect);
+                if(remoteRedirect != null) s = remoteRedirect; // we can go through two tries at this - this is fairly common
+            }
+            
+        } catch(IOException | InterruptedException | URISyntaxException e) {
+            LOG.log(FINE, "caught exception:", e);
+        }
         final String removeRedirect = removeRedirect(s);
         if(removeRedirect != null) {
             final Integer key = generateKey();
@@ -79,7 +93,7 @@ public class FileController {
         if(bytes.length > 500) throw new ResponseStatusException(NOT_FOUND, "file number: " + number + " was not valid");
         final String url = new String(bytes);
         if(! url.startsWith("https://")) throw new ResponseStatusException(NOT_FOUND, "file number: " + number + " was not url");
-        
+        model.addAttribute("key", number);
         model.addAttribute("link", url);
         return "/link";
     }

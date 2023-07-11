@@ -7,7 +7,7 @@
         <link th:href="@{/style.css}" rel="stylesheet"/>
     </head>
     <body>
-        <h1>Link</h1>
+        <h1>Link [[${key}]]</h1>
 
         <p><span id="link" class="link">[[${link}]]</span> <button onclick="copyText()">copy</button> 
             <a th:href="${link}">go</a></p>

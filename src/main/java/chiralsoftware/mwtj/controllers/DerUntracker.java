@@ -2,11 +2,23 @@ package chiralsoftware.mwtj.controllers;
 
 import com.google.common.collect.ImmutableSortedMap;
 import static com.google.common.collect.Ordering.natural;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.net.http.HttpClient;
+import static java.net.http.HttpClient.Redirect.NEVER;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.Duration.ofSeconds;
+import java.util.Optional;
 import java.util.logging.Logger;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -23,6 +35,7 @@ final class DerUntracker {
                     put("https://www.google.com/url", "url").
                     put("https://go.redirectingat.com/", "url"). 
                     put("https://adclick.g.doubleclick.net/aclk", "adurl").
+                    put("https://adclick.g.doubleclick.net/pcs/click", "adurl"). // doubleclick ads - test this out
                     // https://www.avantlink.com/click.php?ctc=gearreviews%2Fbest-winter-gloves_amcid-rbANirAFmeN6ArliYeVAF&merchant_id=b5770911-39dc-46ac-ba0f-b49dbb30c5c7&tt=cl&url=https%3A%2F%2Fwww.backcountry.com%2Fthe-north-face-etip-denali-gloves-mens&website_id=2ea4ea95-bcd0-4bf8-a848-64c4dd59a76d
                     put("https://www.avantlink.com/click.php", "url").
                     put("https://target.georiot.com/Proxy.ashx", "GR_URL"). // GeniusLink, https://geniuslink.com 
@@ -58,14 +71,14 @@ final class DerUntracker {
     static String removeRedirect(String urlString)  {
         if(urlString == null) return null;
         for(String s : prefixAndParameters.keySet()) {
-            if(urlString.startsWith(s)) {
+            if(startsWithIgnoreCase(urlString,s)) {
                 final String paramName = prefixAndParameters.get(s);
                 final MultiValueMap<String, String> params = UriComponentsBuilder.fromUriString(urlString).build().getQueryParams();
                 if(params.containsKey(paramName)) {
                     String urlResultString = params.getFirst(paramName);
                     if(isBlank(urlResultString)) return null;
                     try {
-                        urlResultString = URLDecoder.decode(urlResultString, "UTF-8");
+                        urlResultString = URLDecoder.decode(urlResultString, UTF_8.name());
                     } catch(UnsupportedEncodingException uee) { 
                         return null;
                     }
@@ -75,6 +88,33 @@ final class DerUntracker {
         }
         // it wasn't one of the known redirecters 
         return null;
+    }
+    
+    /** Handle redirectors: t.co, bit.ly. This returns NULL if the URL fails for any reason, such as it's not a redirect URL, 
+     * not found, invalid, etc */
+    static String remoteRedirect(String urlString) throws URISyntaxException, MalformedURLException, IOException, InterruptedException {
+        if (urlString.length() > 60)
+            return null; // long strings are not redirections
+        if (!(startsWithIgnoreCase(urlString, "https://t.co/")
+                || startsWithIgnoreCase(urlString, "https://bit.ly/"))) 
+            return null;
+        
+//        LOG.info("looking at URL : " + urlString + " for a remote redirect");
+        
+        final HttpClient client
+                = HttpClient.newBuilder().followRedirects(NEVER).build();
+
+        final HttpRequest request = HttpRequest.
+                newBuilder(new URI(urlString)).
+                timeout(ofSeconds(1)).
+                GET().
+                build();
+        final HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+        if (response.statusCode() != 301)
+            return null;
+        final Optional<String> locationHeader = response.headers().firstValue("location");
+//        LOG.info("location header: " + locationHeader.orElse(null));
+        return locationHeader.orElse(null);
     }
     
 }
