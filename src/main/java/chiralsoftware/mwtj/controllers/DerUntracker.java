@@ -1,6 +1,7 @@
 package chiralsoftware.mwtj.controllers;
 
 import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.ImmutableSortedSet;
 import static com.google.common.collect.Ordering.natural;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -89,31 +90,34 @@ final class DerUntracker {
         // it wasn't one of the known redirecters 
         return null;
     }
+
+    private static final HttpClient httpClient
+                = HttpClient.newBuilder().followRedirects(NEVER).build();
+
+    
+    private static final ImmutableSortedSet<String> remoteRediectors =
+            new ImmutableSortedSet.Builder<String>(natural()).
+            add("https://t.co/").
+            add("https://bit.ly/").
+            add("https://gofund.me/"). // these are like: https://gofund.me/a680f986
+                    build();
     
     /** Handle redirectors: t.co, bit.ly. This returns NULL if the URL fails for any reason, such as it's not a redirect URL, 
      * not found, invalid, etc */
     static String remoteRedirect(String urlString) throws URISyntaxException, MalformedURLException, IOException, InterruptedException {
         if (urlString.length() > 60)
             return null; // long strings are not redirections
-        if (!(startsWithIgnoreCase(urlString, "https://t.co/")
-                || startsWithIgnoreCase(urlString, "https://bit.ly/"))) 
+        if (! remoteRediectors.stream().anyMatch(rd -> startsWithIgnoreCase(urlString, rd))) 
             return null;
-        
-//        LOG.info("looking at URL : " + urlString + " for a remote redirect");
-        
-        final HttpClient client
-                = HttpClient.newBuilder().followRedirects(NEVER).build();
-
         final HttpRequest request = HttpRequest.
                 newBuilder(new URI(urlString)).
-                timeout(ofSeconds(1)).
+                timeout(ofSeconds(2)). // sometimes gofundme is slow
                 GET().
                 build();
-        final HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-        if (response.statusCode() != 301)
+        final HttpResponse<String> response = httpClient.send(request, BodyHandlers.ofString());
+        if (! (response.statusCode() == 301 || response.statusCode() == 302)) // gofundme returns 302 (temporary), the others return 301 (permanent)
             return null;
         final Optional<String> locationHeader = response.headers().firstValue("location");
-//        LOG.info("location header: " + locationHeader.orElse(null));
         return locationHeader.orElse(null);
     }
     
