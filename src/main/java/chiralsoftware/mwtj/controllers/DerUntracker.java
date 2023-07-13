@@ -31,7 +31,7 @@ final class DerUntracker {
 
     private static final Logger LOG = Logger.getLogger(DerUntracker.class.getName());
     
-    static ImmutableSortedMap<String,String> prefixAndParameters =
+    static final ImmutableSortedMap<String,String> prefixAndParameters =
             new ImmutableSortedMap.Builder<String,String>(natural()).
                     put("https://www.google.com/url", "url").
                     put("https://go.redirectingat.com/", "url"). 
@@ -40,17 +40,38 @@ final class DerUntracker {
                     // https://www.avantlink.com/click.php?ctc=gearreviews%2Fbest-winter-gloves_amcid-rbANirAFmeN6ArliYeVAF&merchant_id=b5770911-39dc-46ac-ba0f-b49dbb30c5c7&tt=cl&url=https%3A%2F%2Fwww.backcountry.com%2Fthe-north-face-etip-denali-gloves-mens&website_id=2ea4ea95-bcd0-4bf8-a848-64c4dd59a76d
                     put("https://www.avantlink.com/click.php", "url").
                     put("https://target.georiot.com/Proxy.ashx", "GR_URL"). // GeniusLink, https://geniuslink.com 
+                    put("https://www.youtube.com/redirect", "q").
+                    build();
+    
+    private static final ImmutableSortedSet<String> queryParamsToDelete =
+            new ImmutableSortedSet.Builder<String>(natural()).
+            add("ref_src").
+            add("ref_url").
+            add("fbclid").
+            add("igshid").
+            add("gclid").
+            add("gad").
+            add("taid").
+            add("cid").
+//            add("").
                     build();
     
         
     static String removeTrackers(String urlString) {
         if(! urlString.startsWith("https://")) return urlString;
         
-        urlString = urlString.replaceFirst("\\?fbclid=.+$", "");
-        urlString = urlString.replaceFirst("\\?igshid=.+$", "");
-        // look for utm_ entries like this:
+        // FIXME: this is overly aggressive because it chops off everything after it has detected
+        // any of the tracker query parameters. Usually they are stuck to the end of the URL but
+        // it might be safer to actually parse the URL and remove unwanted query parameters correctly and then
+        // recreate the URL
+        for(String s : queryParamsToDelete) {
+            urlString = urlString.replaceFirst("\\?" + s + "=.+$", "");
+            urlString = urlString.replaceFirst("&" + s + "=.+$", "");
+        }
+
+            // look for utm_ entries like this:
         // https://www.example.com/events/2952617?utm_medium=email&utm_source=sendgrid&utm_campaign=event_announce_en
-        urlString = urlString.replaceFirst("\\?utm_[a-z]+=.+$", "");
+        urlString = urlString.replaceFirst("\\?utm_[a-z_]+=.+$", "");
 
         if(urlString.startsWith("https://www.amazon.com/")) {
             // everything after /ref= isn't needed
@@ -93,7 +114,6 @@ final class DerUntracker {
 
     private static final HttpClient httpClient
                 = HttpClient.newBuilder().followRedirects(NEVER).build();
-
     
     private static final ImmutableSortedSet<String> remoteRediectors =
             new ImmutableSortedSet.Builder<String>(natural()).
