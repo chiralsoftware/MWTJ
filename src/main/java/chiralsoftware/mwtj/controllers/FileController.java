@@ -129,7 +129,7 @@ public class FileController {
             return bytes;
         
         // it appears to be a URL - make sure it's not too long so it's not some kind of weird hack
-        if(bytes.length > 1000) bytes = Arrays.copyOf(bytes, 1000);
+        if(bytes.length > 2000) bytes = Arrays.copyOf(bytes, 2000);
         
         // convert to a string
         String urlString = new String(bytes); 
@@ -155,7 +155,7 @@ public class FileController {
             throw new ResponseStatusException(NOT_FOUND, "file number: " + number + " was not found");
         final MediaType mediaType;
         final ContentInfo contentInfo = contentInfoUtil.findMatch(bytes);
-        if (contentInfo == null)
+        if (contentInfo == null || contentInfo.getMimeType() == null)
             mediaType = TEXT_PLAIN;
         else
             mediaType = MediaType.valueOf(contentInfo.getMimeType());

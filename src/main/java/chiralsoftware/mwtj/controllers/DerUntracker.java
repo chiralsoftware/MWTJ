@@ -35,12 +35,17 @@ final class DerUntracker {
             new ImmutableSortedMap.Builder<String,String>(natural()).
                     put("https://www.google.com/url", "url").
                     put("https://go.redirectingat.com/", "url"). 
+                    
+                    // these could be combined into a regex
                     put("https://adclick.g.doubleclick.net/aclk", "adurl").
                     put("https://adclick.g.doubleclick.net/pcs/click", "adurl"). // doubleclick ads - test this out
+                    put("https://googleads.g.doubleclick.net/aclk", "adurl"). // doubleclick ads - test this out
+                    
                     // https://www.avantlink.com/click.php?ctc=gearreviews%2Fbest-winter-gloves_amcid-rbANirAFmeN6ArliYeVAF&merchant_id=b5770911-39dc-46ac-ba0f-b49dbb30c5c7&tt=cl&url=https%3A%2F%2Fwww.backcountry.com%2Fthe-north-face-etip-denali-gloves-mens&website_id=2ea4ea95-bcd0-4bf8-a848-64c4dd59a76d
                     put("https://www.avantlink.com/click.php", "url").
                     put("https://target.georiot.com/Proxy.ashx", "GR_URL"). // GeniusLink, https://geniuslink.com 
                     put("https://www.youtube.com/redirect", "q").
+                    put("https://l.facebook.com/l.php", "u"). // fb redirect links
                     build();
     
     private static final ImmutableSortedSet<String> queryParamsToDelete =
@@ -115,11 +120,13 @@ final class DerUntracker {
     private static final HttpClient httpClient
                 = HttpClient.newBuilder().followRedirects(NEVER).build();
     
-    private static final ImmutableSortedSet<String> remoteRediectors =
-            new ImmutableSortedSet.Builder<String>(natural()).
-            add("https://t.co/").
-            add("https://bit.ly/").
-            add("https://gofund.me/"). // these are like: https://gofund.me/a680f986
+    private static final ImmutableSortedSet<String> remoteRediectors
+            = new ImmutableSortedSet.Builder<String>(natural()).
+                    add("https://t.co/").
+                    add("https://bit.ly/").
+                    add("https://amzn.to/").
+                    add("https://a.co/"). // example: https://a.co/d/aEfICVn
+                    add("https://gofund.me/"). // these are like: https://gofund.me/a680f986
                     build();
     
     /** Handle redirectors: t.co, bit.ly. This returns NULL if the URL fails for any reason, such as it's not a redirect URL, 
