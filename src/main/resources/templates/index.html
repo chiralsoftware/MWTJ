@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
     <head>
         <title>One hour file sharing</title>
          <meta name="viewport" content="width=device-width, initial-scale=1.0"/> 
@@ -67,7 +68,7 @@
 
         <form id="fileUpload">
             <p>File: <input id="file" type="file" name="file"/>
-                <input type="submit" value="upload"/>
+                <input type="submit" value="upload"/></p>
         </form>
         
         <hr/> 
@@ -81,16 +82,25 @@
         <hr/>
         
         <h2>Share image</h2>
-        <form id="imageUpload">
+        <form id="imageUpload" th:action="image" enctype="multipart/form-data" method="post">
             <p>File: <input id="image" disabled="disabled" type="file" name="file"/>
                 resize to: 
                 <input type="radio" name="resize" checked="checked" value="1200"/> 1200
                 <input type="radio" name="resize" value="800"/> 800
                 <input type="radio" name="resize" value="600"/> 600
-                file format: <input type="radio" name="format" value="jpeg"/> jpeg
-                <input type="radio" name="format" value="png"/> png
-                <input type="checkbox" name="store" value="store"/> long duration
-                <input type="submit" disabled="disabled" value="upload"/>
+
+                rotate: <input type="radio" name="rotate" checked="checked" value="none"  disabled="disabled" /> none
+                <input type="radio" name="rotate" value="90"  disabled="disabled" /> 90
+                <input type="radio" name="rotate" value="180"  disabled="disabled" /> 180
+                <input type="radio" name="rotate" value="270"  disabled="disabled" /> 270
+                
+                flip / mirror: <input type="radio" name="flipmirror" checked="checked" value="none"  disabled="disabled" /> none
+                <input type="radio" name="flipmirror" value="flip"  disabled="disabled" /> flip
+                <input type="radio" name="flipmirror" value="mirror" disabled="disabled" /> mirror
+                
+                <input type="checkbox" name="store" value="store"  disabled="disabled" /> long duration
+                <input type="submit" value="upload"/>
+            </p>
         </form>
 
         <hr/>
