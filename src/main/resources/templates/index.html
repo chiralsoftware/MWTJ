@@ -83,7 +83,7 @@
         
         <h2>Share image</h2>
         <form id="imageUpload" th:action="image" enctype="multipart/form-data" method="post">
-            <p>File: <input id="image" disabled="disabled" type="file" name="file"/>
+            <p>File: <input id="image" type="file" name="file" accept="image/*"/>
                 resize to: 
                 <input type="radio" name="resize" checked="checked" value="1200"/> 1200
                 <input type="radio" name="resize" value="800"/> 800

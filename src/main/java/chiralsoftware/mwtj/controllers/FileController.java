@@ -1,21 +1,20 @@
 package chiralsoftware.mwtj.controllers;
 
+import chiralsoftware.mwtj.CacheBean.CacheMap;
+import static chiralsoftware.mwtj.CacheBean.maxLength;
 import static chiralsoftware.mwtj.controllers.DerUntracker.remoteRedirect;
 import static chiralsoftware.mwtj.controllers.DerUntracker.removeRedirect;
 import static chiralsoftware.mwtj.controllers.DerUntracker.removeTrackers;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.Random;
-import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.logging.Level.FINE;
 import java.util.logging.Logger;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import static org.springframework.http.HttpStatus.I_AM_A_TEAPOT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -40,14 +39,12 @@ public class FileController {
 
     private static final Logger LOG = Logger.getLogger(FileController.class.getName());
 
-    private final Cache<Integer, byte[]> cache
-            = CacheBuilder.newBuilder().expireAfterWrite(1, HOURS).build();
+    @Autowired
+    private CacheMap cacheMap;
 
-    private final ContentInfoUtil contentInfoUtil = new ContentInfoUtil();
+    @Autowired
+    private ContentInfoUtil contentInfoUtil;
 
-    private final Random random = new Random();
-
-    private static final int maxLength = 100 * 1000000; // files up to 100mb - can be useful for videos
     private static final byte[] httpsPrefix = "https://".getBytes();
     
     /** Allow uploading of URLs. If it does not start with https:// that is added. */
@@ -72,8 +69,7 @@ public class FileController {
         }
         final String removeRedirect = removeRedirect(s);
         if(removeRedirect != null) {
-            final Integer key = generateKey();
-            cache.put(key, removeRedirect.getBytes());
+            final Integer key = cacheMap.put(removeRedirect.getBytes());
             return "redirect:/link/" + key;
         }
         
@@ -81,14 +77,13 @@ public class FileController {
         final String removeTrackers = removeTrackers(s);
         if( isBlank(removeTrackers)) return "redirect:/";
 
-        final Integer key = generateKey();
-        cache.put(key, removeTrackers.getBytes());
+        final Integer key = cacheMap.put(removeTrackers.getBytes());
         return "redirect:/link/" + key;
     }
     
     @GetMapping(value = "/link/{number:[\\d]+}")
     public String getLink(@PathVariable int number, Model model) {
-        final byte[] bytes = cache.getIfPresent(number);
+        final byte[] bytes = cacheMap.get(number);
         if(bytes == null) throw new ResponseStatusException(NOT_FOUND, "file number: " + number + " was not found");
         if(bytes.length > 500) throw new ResponseStatusException(NOT_FOUND, "file number: " + number + " was not valid");
         final String url = new String(bytes);
@@ -105,12 +100,10 @@ public class FileController {
         final byte[] bytes = request.getInputStream().readAllBytes();
         if (bytes.length > maxLength)
             throw new ResponseStatusException(I_AM_A_TEAPOT, "file was too big");
-        final Integer key = generateKey();
-        cache.put(key, safeUrl(bytes));
+        final Integer key = cacheMap.put(safeUrl(bytes));
         return key.toString();
     }
     
-    private Integer generateKey() { return random.nextInt(100000, 999999); }
     
     /**
      * In the case where someone posts a URL, let's go ahead and strip out
@@ -150,7 +143,7 @@ public class FileController {
     // add in a head mapping too - although this is automatically handled by the get mapping
     @GetMapping(value = "/{number:[\\d]+}")
     public ResponseEntity<byte[]> getFile(@PathVariable int number) {
-        final byte[] bytes = cache.getIfPresent(number);
+        final byte[] bytes = cacheMap.get(number);
         if (bytes == null)
             throw new ResponseStatusException(NOT_FOUND, "file number: " + number + " was not found");
         final MediaType mediaType;
