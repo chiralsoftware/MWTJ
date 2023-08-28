@@ -90,7 +90,7 @@ public class FileController {
         if(! url.startsWith("https://")) throw new ResponseStatusException(NOT_FOUND, "file number: " + number + " was not url");
         model.addAttribute("key", number);
         model.addAttribute("link", url);
-        return "/link";
+        return "link";
     }
     
     
