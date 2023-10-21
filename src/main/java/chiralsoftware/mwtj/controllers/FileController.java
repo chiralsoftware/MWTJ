@@ -10,11 +10,15 @@ import com.j256.simplemagic.ContentInfoUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import static java.nio.file.StandardOpenOption.APPEND;
 import java.util.Arrays;
 import static java.util.logging.Level.FINE;
 import java.util.logging.Logger;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import static org.springframework.http.HttpStatus.I_AM_A_TEAPOT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -44,12 +48,15 @@ public class FileController {
 
     @Autowired
     private ContentInfoUtil contentInfoUtil;
+    
+    @Value("${logUrls:false}")
+    private boolean logUrls = false;
 
     private static final byte[] httpsPrefix = "https://".getBytes();
     
     /** Allow uploading of URLs. If it does not start with https:// that is added. */
     @PostMapping("/link")
-    public String postUrl(String s, Model model) {
+    public String postUrl(String s, Model model) throws IOException {
         if(isBlank(s)) return "redirect:/";
         s = s.trim();
         if(s.length() > 500) s = s.substring(0, 500);
@@ -76,6 +83,9 @@ public class FileController {
         // it's not a redirect but it might have trackers
         final String removeTrackers = removeTrackers(s);
         if( isBlank(removeTrackers)) return "redirect:/";
+        if(logUrls) {
+            Files.write(Paths.get("/tmp/url-log"), (removeTrackers + "\n").getBytes(), APPEND);
+        }
 
         final Integer key = cacheMap.put(removeTrackers.getBytes());
         return "redirect:/link/" + key;

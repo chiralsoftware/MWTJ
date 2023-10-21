@@ -58,6 +58,7 @@ final class DerUntracker {
             add("gad").
             add("taid").
             add("cid").
+            add("si"). // this shows up on youtube links
 //            add("").
                     build();
     
