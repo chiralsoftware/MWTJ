@@ -94,7 +94,6 @@ final class DerUntracker {
      null otherwise. If it returns non-null, that's a final result to return. Otherwise, continue 
      with the tracker removal.
      * Example: https://go.redirectingat.com/?id=31959X896062&xs=1&url=https%3A%2F%2Fwww.matchesfashion.com%2Fus%2Fproducts%2FStefan-Cooke-Martlett-stud-embellished-leather-Derby-shoes-1494292&sref=https%3A%2F%2Fwww.gearpatrol.com%2Fstyle%2Fshoes-boots%2Fa42168034%2Fbest-new-boots-shoes-sneakers-2022%2F
-     * 
      */
     static String removeRedirect(String urlString)  {
         if(urlString == null) return null;
@@ -128,12 +127,13 @@ final class DerUntracker {
                     add("https://amzn.to/").
                     add("https://a.co/"). // example: https://a.co/d/aEfICVn
                     add("https://gofund.me/"). // these are like: https://gofund.me/a680f986
+                    add("https://cna.st/affiliate-link/"). // example: https://cna.st/affiliate-link/5Ct....
                     build();
     
     /** Handle redirectors: t.co, bit.ly. This returns NULL if the URL fails for any reason, such as it's not a redirect URL, 
      * not found, invalid, etc */
     static String remoteRedirect(String urlString) throws URISyntaxException, MalformedURLException, IOException, InterruptedException {
-        if (urlString.length() > 60)
+        if (urlString.length() > 300)
             return null; // long strings are not redirections
         if (! remoteRediectors.stream().anyMatch(rd -> startsWithIgnoreCase(urlString, rd))) 
             return null;
@@ -143,7 +143,7 @@ final class DerUntracker {
                 GET().
                 build();
         final HttpResponse<String> response = httpClient.send(request, BodyHandlers.ofString());
-        if (! (response.statusCode() == 301 || response.statusCode() == 302)) // gofundme returns 302 (temporary), the others return 301 (permanent)
+        if (! (response.statusCode() == 301 || response.statusCode() == 302)) // gofundme and cna.st returns 302 (temporary), the others return 301 (permanent)
             return null;
         final Optional<String> locationHeader = response.headers().firstValue("location");
         return locationHeader.orElse(null);
