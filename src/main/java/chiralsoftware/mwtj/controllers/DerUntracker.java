@@ -46,6 +46,8 @@ final class DerUntracker {
                     put("https://target.georiot.com/Proxy.ashx", "GR_URL"). // GeniusLink, https://geniuslink.com 
                     put("https://www.youtube.com/redirect", "q").
                     put("https://l.facebook.com/l.php", "u"). // fb redirect links
+                    // like this: https://analytics.oemsecrets.com/main.php?p=EM120KGLAA-M22-SGADA&m=Quectel&q=0&n=Digi-Key&table=api&media=buynow&source=quectel&event_link=https%3A%2F%2Fwww.digikey.com%2Fen%2Fproducts%2Fdetail%2Fquectel%2FEM120KGLAA-M22-SGADA%2F21272521
+                    put("https://analytics.oemsecrets.com/", "event_link").
                     build();
     
     private static final ImmutableSortedSet<String> queryParamsToDelete =
