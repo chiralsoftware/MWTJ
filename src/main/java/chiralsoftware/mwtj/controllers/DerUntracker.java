@@ -56,6 +56,7 @@ final class DerUntracker {
             add("ref_url").
             add("fbclid").
             add("igshid").
+                    add("igsh").
             add("gclid").
             add("gad").
             add("taid").
