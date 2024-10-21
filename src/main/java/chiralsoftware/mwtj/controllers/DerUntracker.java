@@ -40,6 +40,9 @@ final class DerUntracker {
                     put("https://adclick.g.doubleclick.net/aclk", "adurl").
                     put("https://adclick.g.doubleclick.net/pcs/click", "adurl"). // doubleclick ads - test this out
                     put("https://googleads.g.doubleclick.net/aclk", "adurl"). // doubleclick ads - test this out
+
+                    // https://go.skimresources.com/?id=38395X987171&xs=1&xcust=67004049e4b0c12c1d3bd133%7Cxid%3A%7Bxid%7D&url=https%3A%2F%2Fwww.nature.com%2Farticles%2Fs43016-023-00868-w&sref=https%3A%2F%2Fwww.huffpost.com%2Fentry%2Fhealthy-breakfasts-for-long-life_l_67004049e4b0c12c1d3bd133%3Futm_source%3Dpocket-newtab-en-us&xcreo=500408
+                    put("https://go.skimresources.com/", "url").
                     
                     // https://www.avantlink.com/click.php?ctc=gearreviews%2Fbest-winter-gloves_amcid-rbANirAFmeN6ArliYeVAF&merchant_id=b5770911-39dc-46ac-ba0f-b49dbb30c5c7&tt=cl&url=https%3A%2F%2Fwww.backcountry.com%2Fthe-north-face-etip-denali-gloves-mens&website_id=2ea4ea95-bcd0-4bf8-a848-64c4dd59a76d
                     put("https://www.avantlink.com/click.php", "url").
