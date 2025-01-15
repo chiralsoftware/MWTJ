@@ -65,6 +65,10 @@ final class DerUntracker {
             add("taid").
             add("cid").
             add("si"). // this shows up on youtube links
+            add("sourceid").
+            add("wmlspartner").
+            add("vtcWeb").
+            add("expiryTime").
 //            add("").
                     build();
     
