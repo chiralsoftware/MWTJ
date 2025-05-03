@@ -69,7 +69,12 @@ final class DerUntracker {
             add("sourceid").
             add("wmlspartner").
             add("vtcWeb").
-            add("expiryTime").add("thumb_url").
+            add("expiryTime").
+                    add("thumb_url").
+                    add("_oak_mp_inf").
+            add("s"). // most URLs these days have a session key attached - delete this
+//            add("").
+//            add("").
 //            add("").
                     build();
     
@@ -139,6 +144,7 @@ final class DerUntracker {
                     add("https://a.co/"). // example: https://a.co/d/aEfICVn
                     add("https://gofund.me/"). // these are like: https://gofund.me/a680f986
                     add("https://cna.st/affiliate-link/"). // example: https://cna.st/affiliate-link/5Ct....
+                    add("https://geni.us/").
                     build();
     
     /** Handle redirectors: t.co, bit.ly. This returns NULL if the URL fails for any reason, such as it's not a redirect URL, 
